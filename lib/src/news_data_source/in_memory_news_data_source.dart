@@ -11,25 +11,41 @@ class InMemoryNewsDataSource implements NewsDataSource {
   Future<Article?> getArticleById({
     required String id,
   }) async {
-    return articles.where((article) => article.id == id).first;
+    try {
+      return articles.where((article) => article.id == id).first;
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
   Future<List<Article>> getArticlesByCategory({
     required String newsCategory,
   }) async {
-    return articles
-        .where((article) => article.category?.name == newsCategory)
-        .toList();
+    try {
+      return articles
+          .where((article) => article.category?.name == newsCategory)
+          .toList();
+    } catch (_) {
+      return [Article.empty];
+    }
   }
 
   @override
   Future<List<Article>> getPopularArticles() async {
-    return articles.where((article) => article.isPopular).toList();
+    try {
+      return articles.where((article) => article.isPopular).toList();
+    } catch (_) {
+      return [Article.empty];
+    }
   }
 
   @override
   Future<List<Article>> getBreakingNewsArticles() async {
-    return articles.where((article) => article.isBreakingNews).toList();
+    try {
+      return articles.where((article) => article.isBreakingNews).toList();
+    } catch (_) {
+      return [Article.empty];
+    }
   }
 }

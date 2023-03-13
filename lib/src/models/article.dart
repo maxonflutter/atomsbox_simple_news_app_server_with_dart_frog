@@ -31,6 +31,15 @@ class Article {
     this.isPopular = false,
   });
 
+  static const empty = Article(
+    id: '',
+    author: Author.empty,
+    headline: '',
+    leadParagraph: '',
+    supportingParagraph: [''],
+    imageUrl: '',
+  );
+
   Map<String, dynamic> toJson() => _$ArticleToJson(this);
 
   /// A unique identifier for the Article
