@@ -9,7 +9,7 @@ Future<Response> onRequest(RequestContext context) async {
   }
 
   final newsDataSource = context.read<NewsDataSource>();
-  final articles = await newsDataSource.getPopularArticles();
+  final articles = await newsDataSource.getBreakingNewsArticles();
 
   if (articles.isEmpty) return Response(statusCode: HttpStatus.notFound);
 
