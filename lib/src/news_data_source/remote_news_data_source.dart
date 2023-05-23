@@ -63,15 +63,6 @@ class RemoteNewsDataSource implements NewsDataSource {
     }
   }
 
-// List<Map<String, Map<String, dynamic>>> results = await connection.mappedResultsQuery(
-//   "SELECT t.id, t.name, u.name FROM t LEFT OUTER JOIN u ON t.id=u.t_id");
-
-// for (final row in results) {
-//   var tID = row["t"]["id"];
-//   var tName = row["t"]["name"];
-//   var uName = row["u"]["name"];
-// }
-
   @override
   Future<List<Article>> getArticlesByCategory({
     required String newsCategory,
@@ -106,6 +97,26 @@ class RemoteNewsDataSource implements NewsDataSource {
       await initPostgresConnection();
     }
     try {
+      List<List<dynamic>> results = await _connection.query("""
+          SELECT 
+            id,  
+            author_id,
+            headline,
+            lead_paragraph,
+            image_url,
+            is_breaking_news,
+            is_popular,
+            category,
+          FROM articles 
+          WHERE is_breaking_news = @is_breaking_newsValue
+          """, substitutionValues: {"is_breaking_newsValue": true});
+
+      for (final row in results) {
+        var a = row[0];
+        var b = row[1];
+        print(row);
+      }
+
       return articles.where((article) => article.isBreakingNews).toList();
     } catch (_) {
       return [Article.empty];
