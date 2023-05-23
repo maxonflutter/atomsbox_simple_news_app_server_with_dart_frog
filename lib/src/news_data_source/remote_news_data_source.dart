@@ -1,11 +1,14 @@
 import 'package:postgres/postgres.dart';
 
 import '../models/article.dart';
+import '../models/author.dart';
 import 'in_memory_news_data_source.dart';
 import 'news_data_source.dart';
 
 class RemoteNewsDataSource implements NewsDataSource {
   RemoteNewsDataSource();
+
+  PostgreSQLConnection get connection => _connection;
 
   final _connection = PostgreSQLConnection(
     'localhost',
@@ -21,16 +24,6 @@ class RemoteNewsDataSource implements NewsDataSource {
     });
   }
 
-  Future<List<List<dynamic>>> runQuery() async {
-    if (_connection.isClosed) {
-      await initPostgresConnection();
-    }
-
-    List<List<dynamic>> results =
-        await _connection.query("SELECT * FROM authors");
-    return results;
-  }
-
   @override
   Future<Article?> getArticleById({
     required String id,
@@ -39,25 +32,32 @@ class RemoteNewsDataSource implements NewsDataSource {
       await initPostgresConnection();
     }
     try {
-      List<List<dynamic>> results = await _connection.query("""
-          SELECT 
-            id,  
+      List<Map<String, Map<String, dynamic>>> results =
+          await _connection.mappedResultsQuery("""
+          SELECT
+            id,
             author_id,
             headline,
             lead_paragraph,
             image_url,
             is_breaking_news,
             is_popular,
-            category,
-          FROM articles 
-          WHERE id = @idValue
-          """, substitutionValues: {"idValue": 3});
+            category
+          FROM articles WHERE id = @idValue
+          """, substitutionValues: {"idValue": id});
 
-      for (final row in results) {
-        var a = row[0];
-        var b = row[1];
-      }
-      return articles.where((article) => article.id == id).first;
+      return Article(
+        id: '${results[0]['articles']!['id']}',
+        author: Author(
+          id: '${results[0]['articles']!['author_id']}',
+          name: '${results[0]['articles']!['author_id']}',
+          surname: '${results[0]['articles']!['author_id']}',
+        ),
+        headline: results[0]['articles']!['headline'],
+        leadParagraph: results[0]['articles']!['lead_paragraph'],
+        supportingParagraph: [results[0]['articles']!['lead_paragraph']],
+        imageUrl: results[0]['articles']!['image_url'],
+      );
     } catch (_) {
       return null;
     }
