@@ -2,13 +2,10 @@ import 'package:postgres/postgres.dart';
 
 import '../models/article.dart';
 import '../models/author.dart';
-import 'in_memory_news_data_source.dart';
 import 'news_data_source.dart';
 
 class RemoteNewsDataSource implements NewsDataSource {
   RemoteNewsDataSource();
-
-  PostgreSQLConnection get connection => _connection;
 
   final _connection = PostgreSQLConnection(
     'localhost',
@@ -71,9 +68,41 @@ class RemoteNewsDataSource implements NewsDataSource {
       await initPostgresConnection();
     }
     try {
-      return articles
-          .where((article) => article.category?.name == newsCategory)
-          .toList();
+      List<Map<String, Map<String, dynamic>>> results =
+          await _connection.mappedResultsQuery("""
+          SELECT
+            id,
+            author_id,
+            headline,
+            lead_paragraph,
+            image_url,
+            is_breaking_news,
+            is_popular,
+            category
+          FROM articles 
+          WHERE category = @categoryValue
+          """, substitutionValues: {"categoryValue": newsCategory});
+
+      List<Article> articles = [];
+
+      for (final row in results) {
+        final article = Article(
+          id: '${row['articles']!['id']}',
+          author: Author(
+            id: '${row['articles']!['author_id']}',
+            name: '${row['articles']!['author_id']}',
+            surname: '${row['articles']!['author_id']}',
+          ),
+          headline: row['articles']!['headline'],
+          leadParagraph: row['articles']!['lead_paragraph'],
+          supportingParagraph: [row['articles']!['lead_paragraph']],
+          imageUrl: row['articles']!['image_url'],
+        );
+
+        articles.add(article);
+      }
+
+      return articles;
     } catch (_) {
       return [Article.empty];
     }
@@ -85,7 +114,40 @@ class RemoteNewsDataSource implements NewsDataSource {
       await initPostgresConnection();
     }
     try {
-      return articles.where((article) => article.isPopular).toList();
+      List<Map<String, Map<String, dynamic>>> results =
+          await _connection.mappedResultsQuery("""
+          SELECT
+            id,
+            author_id,
+            headline,
+            lead_paragraph,
+            image_url,
+            is_breaking_news,
+            is_popular,
+            category
+          FROM articles 
+          WHERE is_popular = @is_popularValue
+          """, substitutionValues: {"is_popularValue": true});
+
+      List<Article> articles = [];
+
+      for (final row in results) {
+        final article = Article(
+          id: '${row['articles']!['id']}',
+          author: Author(
+            id: '${row['articles']!['author_id']}',
+            name: '${row['articles']!['author_id']}',
+            surname: '${row['articles']!['author_id']}',
+          ),
+          headline: row['articles']!['headline'],
+          leadParagraph: row['articles']!['lead_paragraph'],
+          supportingParagraph: [row['articles']!['lead_paragraph']],
+          imageUrl: row['articles']!['image_url'],
+        );
+
+        articles.add(article);
+      }
+      return articles;
     } catch (_) {
       return [Article.empty];
     }
@@ -97,27 +159,40 @@ class RemoteNewsDataSource implements NewsDataSource {
       await initPostgresConnection();
     }
     try {
-      List<List<dynamic>> results = await _connection.query("""
-          SELECT 
-            id,  
+      List<Map<String, Map<String, dynamic>>> results =
+          await _connection.mappedResultsQuery("""
+          SELECT
+            id,
             author_id,
             headline,
             lead_paragraph,
             image_url,
             is_breaking_news,
             is_popular,
-            category,
+            category
           FROM articles 
           WHERE is_breaking_news = @is_breaking_newsValue
           """, substitutionValues: {"is_breaking_newsValue": true});
 
-      for (final row in results) {
-        var a = row[0];
-        var b = row[1];
-        print(row);
-      }
+      List<Article> articles = [];
 
-      return articles.where((article) => article.isBreakingNews).toList();
+      for (final row in results) {
+        final article = Article(
+          id: '${row['articles']!['id']}',
+          author: Author(
+            id: '${row['articles']!['author_id']}',
+            name: '${row['articles']!['author_id']}',
+            surname: '${row['articles']!['author_id']}',
+          ),
+          headline: row['articles']!['headline'],
+          leadParagraph: row['articles']!['lead_paragraph'],
+          supportingParagraph: [row['articles']!['lead_paragraph']],
+          imageUrl: row['articles']!['image_url'],
+        );
+
+        articles.add(article);
+      }
+      return articles;
     } catch (_) {
       return [Article.empty];
     }
