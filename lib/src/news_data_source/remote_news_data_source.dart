@@ -16,9 +16,8 @@ class RemoteNewsDataSource implements NewsDataSource {
   );
 
   initPostgresConnection() async {
-    _connection.open().then((value) {
-      print("Database Connected!");
-    });
+    await _connection.open();
+    print("Database Connected!");
   }
 
   @override
