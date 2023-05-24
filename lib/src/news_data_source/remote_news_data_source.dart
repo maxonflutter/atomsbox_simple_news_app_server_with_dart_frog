@@ -15,14 +15,10 @@ class RemoteNewsDataSource implements NewsDataSource {
     password: 'mypassword',
   );
 
-  // initPostgresConnection() async {
-  //   _connection.open().then((value) {
-  //     print("Database Connected!");
-  //   });
-  // }
-
   initPostgresConnection() async {
-    await _connection.open();
+    _connection.open().then((value) {
+      print("Database Connected!");
+    });
   }
 
   @override
@@ -202,3 +198,8 @@ class RemoteNewsDataSource implements NewsDataSource {
     }
   }
 }
+
+
+  // initPostgresConnection() async {
+  //   await _connection.open();
+  // }
